@@ -1006,7 +1006,7 @@ import UIKit
             
             label.sizeToFit()
             
-            topLabel.text = (point < data.count) ? String(data[point]) : ""
+            topLabel.text = (point < data.count) ? String(data[point]).replacingOccurrences(of: ".0", with: "") : ""
             topLabel.textColor = dataPointLabelColor
             topLabel.font = dataPointLabelFont
             topLabelAssociations[topLabel] = point
@@ -1919,7 +1919,7 @@ private class ReferenceLineDrawingView : UIView {
     }
     
     private func boundingSize(forText text: String) -> CGSize {
-        return (text as NSString).size(attributes: [NSFontAttributeName:labelFont])
+        return (text as NSString).size(withAttributes: [kCTFontAttributeName as NSAttributedStringKey: labelFont])
     }
     
     private func calculateYAxisValue(for point: CGPoint) -> Double {
