@@ -28,9 +28,9 @@ import UIKit
     /// Whether or not the line should be rendered using bezier curves are straight lines.
     open var lineStyle = ScrollableGraphViewLineStyle.straight
     /// How each segment in the line should connect. Takes any of the Core Animation LineJoin values.
-    @IBInspectable open var lineJoin: String = kCALineJoinRound
+    @IBInspectable open var lineJoin: String = CAShapeLayerLineJoin.round.rawValue
     /// The line caps. Takes any of the Core Animation LineCap values.
-    @IBInspectable open var lineCap: String = kCALineCapRound
+    @IBInspectable open var lineCap: String = CAShapeLayerLineCap.round.rawValue
     @IBInspectable open var lineCurviness: CGFloat = 0.5
     
     // Bar styles
@@ -224,7 +224,7 @@ import UIKit
     open var dataPointLabelFont: UIFont? = UIFont.systemFont(ofSize: 10)
     /// Used to force the graph to show every n-th dataPoint label
     @IBInspectable open var dataPointLabelsSparsity: Int = 1
-  
+    
     // MARK: - Private State
     // #####################
     
@@ -330,7 +330,7 @@ import UIKit
         
         // Scrolling direction.
         #if TARGET_INTERFACE_BUILDER
-            self.offsetWidth = 0
+        self.offsetWidth = 0
         #else
         if (direction == .rightToLeft) {
             self.offsetWidth = self.contentSize.width - viewportWidth
@@ -402,7 +402,7 @@ import UIKit
         #if !TARGET_INTERFACE_BUILDER
         // Animation loop for when the range adapts
         displayLink = CADisplayLink(target: self, selector: #selector(animationUpdate))
-        displayLink.add(to: RunLoop.main, forMode: RunLoopMode.commonModes)
+        displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.common)
         displayLink.isPaused = true
         #endif
         
@@ -921,17 +921,17 @@ import UIKit
     // If the active points (the points we can actually see) change, then we need to update the path.
     private func activePointsDidChange() {
         
-      let deactivatedPoints = determineDeactivatedPoints()
-      let activatedPoints = determineActivatedPoints()
-      
-      updatePaths()
-      if(shouldShowLabels) {
-        let deactivatedLabelPoints = filterPointsForLabels(fromPoints: deactivatedPoints)
-        let activatedLabelPoints = filterPointsForLabels(fromPoints: activatedPoints)
-        updateLabels(deactivatedPoints: deactivatedLabelPoints, activatedPoints: activatedLabelPoints)
-      }
-  }
-  
+        let deactivatedPoints = determineDeactivatedPoints()
+        let activatedPoints = determineActivatedPoints()
+        
+        updatePaths()
+        if(shouldShowLabels) {
+            let deactivatedLabelPoints = filterPointsForLabels(fromPoints: deactivatedPoints)
+            let activatedLabelPoints = filterPointsForLabels(fromPoints: activatedPoints)
+            updateLabels(deactivatedPoints: deactivatedLabelPoints, activatedPoints: activatedLabelPoints)
+        }
+    }
+    
     private func rangeDidChange() {
         
         // If shouldAnimateOnAdapt is enabled it will kickoff any animations that need to occur.
@@ -956,7 +956,7 @@ import UIKit
             // Need to update the graph points so they are in their right positions for the new viewport.
             // Animate them into position if animation is enabled, but make sure to stop any current animations first.
             #if !TARGET_INTERFACE_BUILDER
-                dequeueAllAnimations()
+            dequeueAllAnimations()
             #endif
             startAnimations()
             
@@ -1026,7 +1026,7 @@ import UIKit
             topLabel.frame = CGRect(origin: adjustedTopLabelPosition, size: topLabel.frame.size)
             
             let _ = labelsView.subviews.filter { $0.frame == label.frame }.map { $0.removeFromSuperview() }
-
+            
             labelsView.addSubview(label)
             labelsView.addSubview(topLabel)
         }
@@ -1069,7 +1069,7 @@ import UIKit
         
         return Array(activatedPoints)
     }
-  
+    
     private func filterPointsForLabels(fromPoints points:[Int]) -> [Int] {
         
         if(self.dataPointLabelsSparsity == 1) {
@@ -1077,7 +1077,7 @@ import UIKit
         }
         return points.filter({ $0 % self.dataPointLabelsSparsity == 0 })
     }
-  
+    
     private func startAnimations(withStaggerValue stagger: Double = 0) {
         
         var pointsToAnimate = 0 ..< 0
@@ -1430,8 +1430,8 @@ private class LineDrawingLayer : ScrollableGraphViewDrawingLayer {
         self.lineWidth = lineWidth
         self.strokeColor = lineColor.cgColor
         
-        self.lineJoin = lineJoin
-        self.lineCap = lineCap
+        self.lineJoin = CAShapeLayerLineJoin(rawValue: lineJoin)
+        self.lineCap = CAShapeLayerLineCap(rawValue: lineCap)
         
         // Setup
         self.fillColor = UIColor.clear.cgColor // This is handled by the fill drawing layer.
@@ -1557,14 +1557,14 @@ private class GradientDrawingLayer : ScrollableGraphViewDrawingLayer {
         let mask = CAShapeLayer()
         
         mask.frame = CGRect(x: 0, y: 0, width: self.viewportWidth, height: self.viewportHeight)
-        mask.fillRule = kCAFillRuleEvenOdd
+        mask.fillRule = CAShapeLayerFillRule.evenOdd
         mask.path = self.graphViewDrawingDelegate?.currentPath().cgPath
         mask.lineJoin = self.lineJoin
         
         return mask
     })()
     
-    init(frame: CGRect, startColor: UIColor, endColor: UIColor, gradientType: ScrollableGraphViewGradientType, lineJoin: String = kCALineJoinRound) {
+    init(frame: CGRect, startColor: UIColor, endColor: UIColor, gradientType: ScrollableGraphViewGradientType, lineJoin: String = CAShapeLayerLineJoin.round.rawValue) {
         self.startColor = startColor
         self.endColor = endColor
         self.gradientType = gradientType
@@ -1919,7 +1919,7 @@ private class ReferenceLineDrawingView : UIView {
     }
     
     private func boundingSize(forText text: String) -> CGSize {
-        return (text as NSString).size(withAttributes: [kCTFontAttributeName as NSAttributedStringKey: labelFont])
+        return (text as NSString).size(withAttributes: [kCTFontAttributeName as NSAttributedString.Key: labelFont])
     }
     
     private func calculateYAxisValue(for point: CGPoint) -> Double {
